@@ -1,0 +1,67 @@
+name: Update Netflix Global Top 10 mirror
+
+on:
+  # Netflix publishes the weekly chart on Tuesdays around 12:00 Pacific (19:00-20:00 UTC).
+  # Runs start after that, with retries for delays. Times below are UTC.
+  schedule:
+    - cron: '30 19 * * 2'
+    - cron: '30 20 * * 2'
+    - cron: '0 22 * * 2'
+    - cron: '0 1 * * 3'
+    - cron: '0 6 * * 3'
+    - cron: '0 12 * * 3'
+  workflow_dispatch:
+
+concurrency:
+  group: netflix-top10-publisher
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update-and-publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fetch, validate and merge Netflix rankings
+        run: python scripts/update_netflix_top10.py --output site/netflix-top10.json
+
+      - name: Commit data changes if the official week changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/netflix-top10.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Update Netflix Global Top 10 data"
+            git push
+          else
+            echo "No JSON changes to commit. Keeping the current published snapshot."
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy mirror to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
