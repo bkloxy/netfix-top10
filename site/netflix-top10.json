@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "waiting_for_first_publish",
+  "freshness_status": "unknown",
+  "source": "Netflix Global Top 10",
+  "source_url": "https://www.netflix.com/tudum/top10/data/all-weeks-global.tsv",
+  "week_ending": null,
+  "updated_at_utc": null,
+  "sort_method": "merged English and Non-English lists, sorted by weekly_views descending",
+  "source_category_counts": {},
+  "movies": [],
+  "tv": []
+}

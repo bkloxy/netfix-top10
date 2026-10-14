@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Netflix Global Top 10 — зеркало данных</title>
+<style>
+  body{margin:0;padding:32px;background:#101116;color:#f2f2f4;font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+  main{max-width:760px;margin:auto}h1{font-size:clamp(26px,5vw,42px);margin:.1em 0 .4em}p{color:#b9bbc6}
+  .panel{padding:20px;border:1px solid #343642;border-radius:14px;background:#191a22;margin:18px 0}
+  code,a{color:#ff6565}a{overflow-wrap:anywhere}.meta{font-size:14px;color:#aeb0bc}
+</style>
+</head>
+<body><main>
+<h1>Netflix Global Top 10</h1>
+<p>Зеркало официального глобального еженедельного рейтинга Netflix для расширения Lampa. Данные публикуются только после проверки TSV.</p>
+<div class="panel"><div id="status">Загружаю состояние…</div><p><a href="./netflix-top10.json">Открыть JSON с рейтингом</a></p></div>
+<p class="meta">Плановое обновление: вторник, 20:00 по Москве, с повторными проверками во вторник и среду. Точное время появления данных Netflix и запуска GitHub Actions не гарантируется.</p>
+</main>
+<script>
+fetch('./netflix-top10.json?ts='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(d){
+ var s=document.getElementById('status');
+ s.textContent='Статус: '+(d.status||'unknown')+'; актуальность: '+(d.freshness_status||'unknown')+'; неделя до '+(d.week_ending||'данных пока нет')+'.';
+ var p=document.createElement('p');p.className='meta';p.textContent='Обновлено: '+(d.updated_at_utc||'ещё не публиковалось')+' · Фильмы: '+((d.movies||[]).length)+' · Сериалы: '+((d.tv||[]).length);s.appendChild(p);
+}).catch(function(){document.getElementById('status').textContent='Не удалось загрузить состояние зеркала.'});
+</script>
+</body></html>
